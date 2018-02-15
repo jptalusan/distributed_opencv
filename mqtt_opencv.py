@@ -9,6 +9,7 @@ from imutils.video import FPS
 import imutils
 import time
 import json
+import pickle
 
 def bench(img):
     frame = cv2.imdecode(np.fromstring(img, dtype=np.uint8), 1)
@@ -20,6 +21,8 @@ def bench(img):
  
     net.setInput(blob)
     detections = net.forward()
+
+    # data = pickle.dumps(detections)
 
     for i in np.arange(0, detections.shape[2]):
         confidence = detections[0, 0, i, 2]
@@ -37,8 +40,8 @@ def bench(img):
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 
     # print('saving...')
-    name = "image" + datetime.datetime.now().strftime('%H%M%S') + ".jpg"
-    cv2.imwrite(name, frame)
+    # name = "image" + datetime.datetime.now().strftime('%H%M%S') + ".jpg"
+    # cv2.imwrite(name, frame)
     # cv2.imwrite('image.jpg', frame)
     # print('done saving.')
     # Sending via MQTT
@@ -86,7 +89,7 @@ mqttc.on_disconnect = on_disconnect
 # Uncomment to enable debug messages
 # mqttc.on_log = on_log
 mqttc.connect("163.221.68.224", 1883, 60)
-mqttc.subscribe("hello/world", 0)
+mqttc.subscribe("hello/world3", 0)
 
 print("[INFO] loading model...")
 net = cv2.dnn.readNetFromCaffe('/home/pi/virtualenvs/opencv/MobileNetSSD_deploy.prototxt', '/home/pi/virtualenvs/opencv/MobileNetSSD_deploy.caffemodel')
@@ -95,6 +98,26 @@ CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
     "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
     "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
     "sofa", "train", "tvmonitor"]
-COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
-
+# COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
+COLORS = [[ 44.18937886, 246.96730454,  73.04242211],
+       [250.12082477,  64.86789038, 127.30777312],
+       [ 42.24136576,  58.37372156, 164.26309563],
+       [223.06331711, 109.74376324, 155.80390287],
+       [185.08709893, 226.65109253, 207.6055207 ],
+       [236.07673731, 185.30827578, 202.81771854],
+       [144.55106179, 144.33676777,  13.94532094],
+       [187.12402101,  17.84717238, 169.79134966],
+       [108.56370186,  11.93672853, 101.48437193],
+       [242.67313174, 199.58060928, 105.16230962],
+       [ 55.8721673 , 152.57844089,  10.81330649],
+       [ 61.49715633, 202.01490572, 215.6031341 ],
+       [ 46.84328774,  97.63950579,  45.02124015],
+       [155.97362898, 170.12816067,  22.99799861],
+       [ 84.17340808, 195.2619167 ,  15.89690156],
+       [ 82.28596664, 101.00173901, 133.31767819],
+       [157.12551971, 136.96627224, 219.19731213],
+       [168.25525718,  46.68111693,  89.16807578],
+       [ 41.48822204,  29.68208425, 244.29332197],
+       [197.541347  , 106.32026389, 183.67652336],
+       [203.44645816, 117.39418267, 127.80463932]]
 mqttc.loop_forever()
