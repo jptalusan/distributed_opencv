@@ -1,0 +1,14 @@
+I am using this on raspbian Jessie but could work with others as well.  
+
+Prerequisite:  
+- OpenCV 3.3 [https://jpinjpblog.wordpress.com/2018/02/09/installing-opencv-on-raspberry-pi-3/]  
+- sudo apt-get install python3-dev  
+
+Setup:  
+- python3 -m venv venv  
+- . venv/bin/activate
+- pip install -r requirements.txt  
+- add cv2.so to site-packages  
+
+Edit code depending on where the MQTT broker is located.  
+Use in conjunction with Flask-opencv [https://github.com/linusmotu/flask_socketsio/tree/flask-opencv] 
