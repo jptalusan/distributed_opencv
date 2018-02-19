@@ -10,8 +10,9 @@ import imutils
 import time
 import json
 import pickle
+import os
 
-def bench(img):
+def bench(img, time_received):
     frame = cv2.imdecode(np.fromstring(img, dtype=np.uint8), 1)
     frame = imutils.resize(frame, width=400)
 
@@ -48,7 +49,11 @@ def bench(img):
     img_str = cv2.imencode(".jpg", frame)
     send_data = base64.b64encode(img_str[1].tostring())
     # print(type(img_str[1].tostring()))
-    publish.single('hello/server', send_data, hostname="163.221.68.224")
+    
+    base64_string = send_data.decode('utf-8')
+    data = {"image": base64_string, "time_received": time_received}
+
+    publish.single('hello/server', json.dumps(data), hostname="163.221.68.224")
 
 def on_connect(mqttc, obj, flags, rc):
     print("rc: " + str(rc))
@@ -56,8 +61,9 @@ def on_connect(mqttc, obj, flags, rc):
 
 def on_message(mqttc, obj, msg):
     print('Time on first receive slave: {}'.format(datetime.datetime.now()))
+    time_received = datetime.datetime.now().strftime('%H%M%S')
     img = base64.b64decode(msg.payload)
-    bench(img)
+    bench(img, time_received)
 
 def on_publish(mqttc, obj, mid):
     print("mid: " + str(mid))
@@ -88,18 +94,25 @@ mqttc.on_disconnect = on_disconnect
 
 # Uncomment to enable debug messages
 # mqttc.on_log = on_log
+# make into argparse
 mqttc.connect("163.221.68.224", 1883, 60)
-mqttc.subscribe("hello/world3", 0)
+mqttc.subscribe("hello/world0", 0)
 
 print("[INFO] loading model...")
-net = cv2.dnn.readNetFromCaffe('/home/pi/virtualenvs/opencv/MobileNetSSD_deploy.prototxt', '/home/pi/virtualenvs/opencv/MobileNetSSD_deploy.caffemodel')
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+prototxt = dir_path + '/MobileNetSSD_deploy.prototxt'
+caffemodel = dir_path + '/MobileNetSSD_deploy.caffemodel'
+
+net = cv2.dnn.readNetFromCaffe(prototxt, caffemodel)
 # net = None
 CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
     "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
     "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
     "sofa", "train", "tvmonitor"]
 # COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
-COLORS = [[ 44.18937886, 246.96730454,  73.04242211],
+COLORS = [[ 239.18937886, 246.96730454,  131.04242211],
        [250.12082477,  64.86789038, 127.30777312],
        [ 42.24136576,  58.37372156, 164.26309563],
        [223.06331711, 109.74376324, 155.80390287],
